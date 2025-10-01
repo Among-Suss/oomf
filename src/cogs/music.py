@@ -1,10 +1,11 @@
 import discord
 from discord.ext import commands
+from discord import app_commands
 import yt_dlp
 import asyncio
 
 # YDL options for yt-dlp
-YDL_OPTIONS = {'format': 'ba', 'noplaylist':'True'}
+YDL_OPTIONS = {'format': 'ba/b', 'noplaylist':'True'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
 class Music(commands.Cog):
@@ -30,28 +31,42 @@ class Music(commands.Cog):
         else:
             await ctx.send("I am not in a voice channel.")
 
-    @commands.command()
+    @commands.hybrid_command(name="play", description="Search YouTube or play a URL.", aliases=['p'])
+    @app_commands.describe(search="The name or URL of the song to play.")
     async def play(self, ctx, *, search):
         """Plays a song from YouTube."""
-        if not ctx.voice_client:
+        
+        if not ctx.author.voice:
+            await ctx.send("You are not connected to a voice channel.", ephemeral=True)
+            return
+        elif not ctx.voice_client:
             await ctx.invoke(self.join)
+        elif ctx.voice_client.channel != ctx.author.voice.channel:
+            await ctx.send(f"I am already in the voice channel: **{ctx.voice_client.channel.name}**.")
+            return
+        
+        # Defer the response for slash commands to avoid "interaction failed" errors
+        if ctx.interaction:
+            await ctx.defer()
 
         with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
             try:
-                info = ydl.extract_info(f"ytsearch:{search}", download=False)['entries'][0]
-            except Exception:
-                await ctx.send("Could not find the song.")
+                if search.startswith("https://"):
+                    query = search
+                    info = ydl.extract_info(query, download=False)
+                else:
+                    query = f"ytsearch:{search}"
+                    info = ydl.extract_info(query, download=False)['entries'][0]
+            except Exception as e:
+                print(e)
+                await ctx.send("Error getting video info from yt-dlp.")
                 return
-
-        url = info['url']
-        source = await discord.FFmpegOpusAudio.from_probe(url, **FFMPEG_OPTIONS)
         
         guild_id = ctx.guild.id
-
         if guild_id not in self.song_queue:
             self.song_queue[guild_id] = []
 
-        self.song_queue[guild_id].append({'source': source, 'title': info['title']})
+        self.song_queue[guild_id].append({'url': info['url'], 'title': info['title']})
 
         if not ctx.voice_client.is_playing() and not ctx.voice_client.is_paused():
             await self.play_next(ctx)
@@ -63,7 +78,8 @@ class Music(commands.Cog):
         if self.song_queue[guild_id]:
             song = self.song_queue[guild_id].pop(0)
             self.current_song[guild_id] = song
-            ctx.voice_client.play(song['source'], after=lambda e: self.bot.loop.create_task(self.play_next(ctx)))
+            source = await discord.FFmpegOpusAudio.from_probe(song['url'], **FFMPEG_OPTIONS)
+            ctx.voice_client.play(source, after=lambda e: self.bot.loop.create_task(self.play_next(ctx)))
             await ctx.send(f"Now playing: **{song['title']}**")
         else:
             self.current_song.pop(guild_id, None)

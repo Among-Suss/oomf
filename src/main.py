@@ -7,18 +7,26 @@ import asyncio
 # Load environment variables from .env file
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+PREFIX = os.getenv('DISCORD_PREFIX')
 
 # Define intents
 intents = discord.Intents.default()
 intents.message_content = True
 
 # Create a bot instance with a command prefix
-bot = commands.Bot(command_prefix='!', intents=intents)
+if not PREFIX:
+    command_prefix="!"
+else:
+    command_prefix=PREFIX
+
+bot = commands.Bot(command_prefix=command_prefix, intents=intents)
 
 # Event listener for when the bot is ready
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
+    await bot.tree.sync()
+    print("Slash commands synced.")
     print('------')
 
 # Asynchronous function to load cogs
