@@ -16,7 +16,6 @@ class Music(commands.Cog):
 
     @commands.command()
     async def join(self, ctx):
-        """Makes the bot join the voice channel of the user."""
         if ctx.author.voice:
             channel = ctx.author.voice.channel
             await channel.connect()
@@ -25,7 +24,6 @@ class Music(commands.Cog):
 
     @commands.command()
     async def leave(self, ctx):
-        """Makes the bot leave the voice channel."""
         if ctx.voice_client:
             await ctx.guild.voice_client.disconnect()
         else:
@@ -33,9 +31,7 @@ class Music(commands.Cog):
 
     @commands.hybrid_command(name="play", description="Search YouTube or play a URL.", aliases=['p'])
     @app_commands.describe(search="The name or URL of the song to play.")
-    async def play(self, ctx, *, search):
-        """Plays a song from YouTube."""
-        
+    async def play(self, ctx, *, search):        
         if not ctx.author.voice:
             await ctx.send("You are not connected to a voice channel.", ephemeral=True)
             return
@@ -84,30 +80,28 @@ class Music(commands.Cog):
         else:
             self.current_song.pop(guild_id, None)
 
-    @commands.command()
+    # broken - corrupts the playback
+    # @commands.command()
     async def pause(self, ctx):
-        """Pauses the current song."""
         if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
             await ctx.send("Paused the song.")
 
-    @commands.command()
+    # broken - corrupts the playback
+    # @commands.command()
     async def resume(self, ctx):
-        """Resumes the paused song."""
         if ctx.voice_client.is_paused():
             ctx.voice_client.resume()
             await ctx.send("Resumed the song.")
 
     @commands.command()
     async def skip(self, ctx):
-        """Skips the current song."""
         if ctx.voice_client.is_playing() or ctx.voice_client.is_paused():
             ctx.voice_client.stop()
             await ctx.send("Skipped the current song.")
 
     @commands.command()
     async def queue(self, ctx):
-        """Displays the song queue."""
         guild_id = ctx.guild.id
         if guild_id in self.song_queue and self.song_queue[guild_id]:
             queue_list = ""
@@ -119,9 +113,8 @@ class Music(commands.Cog):
         else:
             await ctx.send("The queue is empty.")
 
-    @commands.command()
+    @commands.hybrid_command(name="nowplaying", description="Show current song.", aliases=['np'])
     async def nowplaying(self, ctx):
-        """Displays the currently playing song."""
         guild_id = ctx.guild.id
         if guild_id in self.current_song:
             await ctx.send(f"Currently playing: **{self.current_song[guild_id]['title']}**")
