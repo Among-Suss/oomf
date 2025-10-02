@@ -2,7 +2,7 @@
 Discord music bot in Python
 
 # How to run
-Requires `python3`
+Requires `python3` and `ffmpeg`
 
 Create a `.env` file in project folder with the following variables modified accordingly.
 ```
