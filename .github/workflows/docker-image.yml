@@ -40,5 +40,5 @@ jobs:
             GET_COMMIT_HASH=${{ github.sha }}
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
