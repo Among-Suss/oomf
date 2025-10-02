@@ -5,7 +5,7 @@ import yt_dlp
 import asyncio
 
 # YDL options for yt-dlp
-YDL_OPTIONS = {'format': 'ba/b', 'noplaylist':'True'}
+YDL_OPTIONS = {'format': 'ba/b', 'noplaylist':'True', 'extractor_args':{'youtube': {'player_client': ['android_vr']}}}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
 class Music(commands.Cog):
