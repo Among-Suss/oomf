@@ -8,6 +8,7 @@ import asyncio
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 PREFIX = os.getenv('DISCORD_PREFIX')
+DEBUG_CHANNEL = os.getenv('DEBUG_CHANNEL')
 
 # Define intents
 intents = discord.Intents.default()
@@ -24,6 +25,11 @@ bot = commands.Bot(command_prefix=command_prefix, intents=intents)
 # Event listener for when the bot is ready
 @bot.event
 async def on_ready():
+    if DEBUG_CHANNEL:
+        channel = bot.get_channel(int(DEBUG_CHANNEL))
+        if channel:
+            await channel.send("Bot is now online! `version: " + os.getenv('GET_COMMIT_HASH', 'unknown') + "`")
+
     print(f'Logged in as {bot.user.name}')
     await bot.tree.sync()
     print("Slash commands synced.")
