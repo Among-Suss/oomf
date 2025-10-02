@@ -28,7 +28,7 @@ async def on_ready():
     if DEBUG_CHANNEL:
         channel = bot.get_channel(int(DEBUG_CHANNEL))
         if channel:
-            await channel.send("Bot is now online! `version: " + os.getenv('GET_COMMIT_HASH', 'unknown') + "`")
+            await channel.send("Bot is now online! `version: " + os.getenv('GIT_COMMIT_HASH', 'unknown') + "`")
 
     print(f'Logged in as {bot.user.name}')
     await bot.tree.sync()
