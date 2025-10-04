@@ -7,7 +7,7 @@ import io
 
 # YDL options for yt-dlp
 YDL_OPTIONS = {'format': 'ba/b', 'noplaylist':'True', 'extractor_args':{'youtube': {'player_client': ['android_vr']}}}
-FFMPEG_OPTIONS = {'before_options': '-f concat -i cogs/res/silence.ac3 -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': f'-vn -packet_loss 10 -blocksize {io.DEFAULT_BUFFER_SIZE * 4}'}
+FFMPEG_OPTIONS = {'before_options': '-f concat -i cogs/res/silence.opus -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': f'-vn -packet_loss 10 -blocksize {io.DEFAULT_BUFFER_SIZE * 4}'}
 
 class Music(commands.Cog):
     def __init__(self, bot):
