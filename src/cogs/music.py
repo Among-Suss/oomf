@@ -31,21 +31,28 @@ class Music(commands.Cog):
 
     @commands.hybrid_command(name="play", description="Search YouTube or play a URL.", aliases=['p'])
     @app_commands.describe(search="The name or URL of the song to play.")
-    async def play(self, ctx, *, search):        
+    async def play(self, ctx, *, search):
         if not ctx.author.voice:
+            print("[Error] User not in voice channel.")
             await ctx.send("You are not connected to a voice channel.", ephemeral=True)
             return
         elif not ctx.voice_client:
-            await ctx.invoke(self.join)
+            channel = ctx.author.voice.channel
+            print(f"Joining voice channel: {channel}")
+            await channel.connect()
+            print("Joined voice channel: {channel}")
         elif ctx.voice_client.channel != ctx.author.voice.channel:
+            print("[Error] User not in same voice channel as bot.")
             await ctx.send(f"I am already in the voice channel: **{ctx.voice_client.channel.name}**.")
             return
         
         # Defer the response for slash commands to avoid "interaction failed" errors
         if ctx.interaction:
+            print("Deferring response for slash command...")
             await ctx.defer()
 
         with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
+            print(f"Searching for: {search}")
             try:
                 if search.startswith("https://"):
                     query = search

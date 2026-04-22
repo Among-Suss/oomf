@@ -35,11 +35,26 @@ async def on_ready():
     print("Slash commands synced.")
     print('------')
 
+@bot.event
+async def on_command_error(ctx, error):
+    # This prevents any commands with their own local handlers 
+    # from being handled here as well.
+    if hasattr(ctx.command, 'on_error'):
+        return
+
+    # This pulls the original exception if it's wrapped in CommandInvokeError
+    error = getattr(error, 'original', error)
+
+    print(f'Error in command {ctx.command}: {error}')
+    # Optionally send to the user:
+    await ctx.send("An error occurred while processing that command: " + str(error), ephemeral=True)
+
 # Asynchronous function to load cogs
 async def load_cogs():
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
             await bot.load_extension(f'cogs.{filename[:-3]}')
+            print(f'Loaded cog: {filename}')
 
 # Main function to run the bot
 async def main():
